@@ -67,14 +67,6 @@ require_once 'includes/header.php';
                     <li>User-friendly interface for easy navigation</li>
                 </ul>
             </section>
-            
-            <section class="about-section">
-                <h2>Demo Project Notice</h2>
-                <div class="demo-notice-box">
-                    <i class="fas fa-info-circle"></i>
-                    <p><strong>Important:</strong> This is a demonstration semester project created for educational purposes. All payment processing is simulated, and no real financial transactions occur. This platform showcases modern web development practices and full-stack application architecture.</p>
-                </div>
-            </section>
         </div>
     </div>
 </div>

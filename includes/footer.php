@@ -56,7 +56,7 @@
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> <?php echo APP_NAME; ?>. Demo Semester Project. All payments are simulated and no real money is processed.</p>
+                <p>&copy; <?php echo date('Y'); ?> <?php echo APP_NAME; ?>. Demo Project. All payments are simulated and no real money is processed.</p>
             </div>
         </div>
     </footer>

@@ -1,8 +1,5 @@
 -- Car Platform Database Schema
--- Drop database if exists and create fresh
-DROP DATABASE IF EXISTS car_platform;
-CREATE DATABASE car_platform CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE car_platform;
+
 
 -- Users table
 CREATE TABLE users (
