@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500" role="img" aria-label="Car image placeholder">
+  <rect width="800" height="500" fill="#e5e7eb"/>
+  <rect x="0" y="320" width="800" height="180" fill="#d1d5db"/>
+  <g fill="none" stroke="#9ca3af" stroke-width="8" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M160 310c20-70 70-110 140-118h180c80 0 120 30 160 90"/>
+    <path d="M140 310h520c30 0 50 20 50 46v18H90v-18c0-26 20-46 50-46z"/>
+    <circle cx="250" cy="376" r="36"/>
+    <circle cx="560" cy="376" r="36"/>
+  </g>
+  <circle cx="250" cy="376" r="16" fill="#9ca3af"/>
+  <circle cx="560" cy="376" r="16" fill="#9ca3af"/>
+  <text x="400" y="230" text-anchor="middle" fill="#6b7280" font-family="Segoe UI, Arial, sans-serif" font-size="28" font-weight="600">No image available</text>
+</svg>
