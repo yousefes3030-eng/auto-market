@@ -50,7 +50,7 @@ require_once 'includes/header.php';
                             <span class="gallery-counter" id="galleryCounter">1 / <?php echo count($images); ?></span>
                         <?php endif; ?>
                     <?php else: ?>
-                        <img src="<?php echo e(imageUrl('assets/images/placeholder-car.svg')); ?>" alt="Car image" id="mainImg">
+                        <img src="<?php echo e(imageUrl('assets/images/placeholder-car.jpg')); ?>" alt="Car image" id="mainImg">
                     <?php endif; ?>
                 </div>
                 
@@ -99,7 +99,7 @@ require_once 'includes/header.php';
                 
                 <div class="car-status-section">
                     <span class="status-badge badge-<?php echo getStatusBadgeClass($car['status']); ?>">
-                        <?php echo ucfirst(e($car['status'])); ?>
+                        <?php echo e(formatCarPublicStatus($car['status'])); ?>
                     </span>
                 </div>
                 
@@ -120,7 +120,7 @@ require_once 'includes/header.php';
                     </div>
                 <?php else: ?>
                     <div class="alert alert-warning">
-                        This vehicle is currently <?php echo e($car['status']); ?> and not available for rent or purchase.
+                        <?php echo e(carUnavailableMessage($car['status'])); ?>
                     </div>
                 <?php endif; ?>
                 
@@ -160,7 +160,7 @@ require_once 'includes/header.php';
                         </div>
                         
                         <div class="spec-item">
-                            <i class="fas fa-engine"></i>
+                            <i class="fa-brands fa-unity"></i>
                             <div>
                                 <span class="spec-label">Engine</span>
                                 <span class="spec-value"><?php echo e($car['engine']); ?></span>

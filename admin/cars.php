@@ -88,7 +88,7 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td><?php echo formatPrice($car['price']); ?></td>
                                 <td>
                                     <span class="status-badge badge-<?php echo getStatusBadgeClass($car['status']); ?>">
-                                        <?php echo ucfirst(e($car['status'])); ?>
+                                        <?php echo e(formatCarPublicStatus($car['status'])); ?>
                                     </span>
                                 </td>
                                 <td>

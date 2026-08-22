@@ -76,9 +76,9 @@ require_once 'includes/header.php';
                         <h4>What happens next?</h4>
                         <ol>
                             <li>Complete the payment process</li>
-                            <li>Receive purchase confirmation</li>
+                            <li>The car is reserved for you while an admin reviews the order</li>
+                            <li>Once confirmed, the car is marked sold for other users</li>
                             <li>Our team will contact you for delivery arrangements</li>
-                            <li>Complete vehicle transfer documentation</li>
                         </ol>
                     </div>
                     
@@ -87,7 +87,7 @@ require_once 'includes/header.php';
                         <ul>
                             <li>This is a demo payment system - no real money will be charged</li>
                             <li>Purchase is final once payment is processed</li>
-                            <li>Vehicle will be marked as sold after purchase</li>
+                            <li>Vehicle will be reserved after payment, then marked sold after admin confirmation</li>
                             <li>All prices include applicable taxes</li>
                         </ul>
                     </div>
@@ -98,11 +98,11 @@ require_once 'includes/header.php';
                         <div class="form-group">
                             <label class="checkbox-label">
                                 <input type="checkbox" name="confirm" value="yes" required>
-                                <span>I confirm that I want to purchase this vehicle for <?php echo formatPrice($car['price']); ?></span>
+                                <span style="user-select: none;">I confirm that I want to purchase this vehicle for <?php echo formatPrice($car['price']); ?></span>
                             </label>
                         </div>
                         
-                        <button type="submit" class="btn btn-success btn-lg btn-block">
+                        <button type="submit" class="btn btn-success btn-lg btn-block" style="margin-bottom: 0.5rem;">
                             Proceed to Payment
                         </button>
                         

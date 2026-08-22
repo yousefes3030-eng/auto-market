@@ -17,22 +17,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         if (in_array($newStatus, $validStatuses)) {
             try {
                 $pdo->beginTransaction();
-                
+
+                $stmt = $pdo->prepare("SELECT * FROM reservations WHERE id = ? FOR UPDATE");
+                $stmt->execute([$reservationId]);
+                $reservation = $stmt->fetch();
+
+                if (!$reservation) {
+                    throw new Exception('Reservation not found.');
+                }
+
+                $carRow = lockCarRow($reservation['car_id'], $pdo);
+                if (!$carRow) {
+                    throw new Exception('Car not found.');
+                }
+
+                if ($newStatus === 'confirmed') {
+                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE car_id = ? AND status IN ('pending', 'completed')");
+                    $stmt->execute([$reservation['car_id']]);
+                    if ((int)$stmt->fetchColumn() > 0) {
+                        throw new Exception('This car has an active purchase. Cancel or complete that purchase first.');
+                    }
+                }
+
                 $stmt = $pdo->prepare("UPDATE reservations SET status = ? WHERE id = ?");
                 $stmt->execute([$newStatus, $reservationId]);
                 
-                // If cancelled, update payment status
                 if ($newStatus === 'cancelled') {
                     $stmt = $pdo->prepare("UPDATE payments SET status = 'refunded' WHERE reservation_id = ?");
                     $stmt->execute([$reservationId]);
                 }
+
+                syncCarPublicStatus($reservation['car_id'], $pdo);
                 
                 $pdo->commit();
-                setFlashMessage('Reservation updated successfully!', 'success');
+                setFlashMessage('Reservation updated. Car status is now ' . formatCarPublicStatus(derivedCarPublicStatus($reservation['car_id'], $pdo)) . '.', 'success');
                 
             } catch (Exception $e) {
                 $pdo->rollBack();
-                setFlashMessage('Failed to update reservation.', 'error');
+                setFlashMessage($e->getMessage() ?: 'Failed to update reservation.', 'error');
             }
         }
     }
@@ -44,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 // Get all reservations with details
 $stmt = $pdo->query("
     SELECT r.*, u.name as user_name, u.email as user_email,
-           c.model, c.year, b.name as brand_name
+           c.model, c.year, c.status as car_status, b.name as brand_name
     FROM reservations r
     JOIN users u ON r.user_id = u.id
     JOIN cars c ON r.car_id = c.id
@@ -62,7 +84,7 @@ require_once __DIR__ . '/../includes/header.php';
     <main class="admin-content">
         <div class="admin-header">
             <h1>Manage Reservations</h1>
-            <p>View and manage all car rental reservations</p>
+            <p>Order statuses stay on the reservation. The car’s public status (reserved, rented, available) updates automatically.</p>
         </div>
         
         <!-- Reservations List -->
@@ -80,7 +102,8 @@ require_once __DIR__ . '/../includes/header.php';
                             <th>End Date</th>
                             <th>Days</th>
                             <th>Total</th>
-                            <th>Status</th>
+                            <th>Order status</th>
+                            <th>Car status</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -102,6 +125,11 @@ require_once __DIR__ . '/../includes/header.php';
                                 <td>
                                     <span class="status-badge badge-<?php echo getStatusBadgeClass($res['status']); ?>">
                                         <?php echo ucfirst(e($res['status'])); ?>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="status-badge badge-<?php echo getStatusBadgeClass($res['car_status']); ?>">
+                                        <?php echo e(formatCarPublicStatus($res['car_status'])); ?>
                                     </span>
                                 </td>
                                 <td>

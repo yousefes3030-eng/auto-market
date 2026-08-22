@@ -119,12 +119,12 @@ function getPrimaryCarImage($carId) {
     $stmt->execute([$carId]);
     $image = $stmt->fetch();
     
-    return imageUrl($image ? $image['image_path'] : 'assets/images/placeholder-car.svg');
+    return imageUrl($image ? $image['image_path'] : 'assets/images/placeholder-car.jpg');
 }
 
 function imageUrl($path) {
     if (empty($path)) {
-        $path = 'assets/images/placeholder-car.svg';
+        $path = 'assets/images/placeholder-car.jpg';
     }
     if (preg_match('#^https?://#i', $path)) {
         return $path;
@@ -261,7 +261,7 @@ function normalizeCarFilters($input) {
 
 // Build WHERE clause for car listings
 function buildCarFilterQuery($filters) {
-    $where = ["c.status = 'available'"];
+    $where = ["c.status IN ('available', 'reserved', 'rented', 'sold')"];
     $params = [];
 
     if ($filters['search'] !== '') {
@@ -389,10 +389,162 @@ function getFeaturedCars($limit = 6) {
     return $stmt->fetchAll();
 }
 
-// Check if car is available
+// Check if car is available to rent or buy
 function isCarAvailable($carId) {
     $car = getCarById($carId);
-    return $car && in_array($car['status'], ['available']);
+    return $car && $car['status'] === 'available';
+}
+
+function formatCarPublicStatus($status) {
+    $labels = [
+        'available' => 'Available',
+        'reserved' => 'Reserved',
+        'rented' => 'Rented',
+        'sold' => 'Sold',
+        'maintenance' => 'Unavailable',
+        'inactive' => 'Unavailable',
+    ];
+
+    return $labels[$status] ?? 'Unavailable';
+}
+
+function carUnavailableMessage($status) {
+    if ($status === 'reserved') {
+        return 'This vehicle is currently reserved and is not available for rent or purchase.';
+    }
+    if ($status === 'rented') {
+        return 'This vehicle is currently rented and is not available for rent or purchase.';
+    }
+    if ($status === 'sold') {
+        return 'This vehicle has been sold and is no longer available.';
+    }
+
+    return 'This vehicle is not available for rent or purchase.';
+}
+
+function carStatusOverlayHtml($status) {
+    if ($status === 'available') {
+        return '';
+    }
+
+    $overlayClass = in_array($status, ['reserved', 'rented', 'sold'], true) ? $status : 'unavailable';
+    return '<span class="car-status-overlay overlay-' . e($overlayClass) . '">' .'</span>';
+}
+
+function derivedCarPublicStatus($carId, $pdo = null) {
+    $pdo = $pdo ?: getDB();
+    $carId = (int)$carId;
+
+    $stmt = $pdo->prepare("SELECT status FROM cars WHERE id = ?");
+    $stmt->execute([$carId]);
+    $car = $stmt->fetch();
+    if (!$car) {
+        return null;
+    }
+
+    if (in_array($car['status'], ['maintenance', 'inactive'], true)) {
+        return $car['status'];
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM purchases WHERE car_id = ? AND status = 'completed'");
+    $stmt->execute([$carId]);
+    if ((int)$stmt->fetchColumn() > 0) {
+        return 'sold';
+    }
+
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations WHERE car_id = ? AND status = 'confirmed'");
+    $stmt->execute([$carId]);
+    if ((int)$stmt->fetchColumn() > 0) {
+        return 'rented';
+    }
+
+    $stmt = $pdo->prepare("
+        SELECT (
+            (SELECT COUNT(*) FROM reservations WHERE car_id = ? AND status = 'pending') +
+            (SELECT COUNT(*) FROM purchases WHERE car_id = ? AND status = 'pending')
+        )
+    ");
+    $stmt->execute([$carId, $carId]);
+    if ((int)$stmt->fetchColumn() > 0) {
+        return 'reserved';
+    }
+
+    return 'available';
+}
+
+function syncCarPublicStatus($carId, $pdo = null) {
+    $pdo = $pdo ?: getDB();
+    $status = derivedCarPublicStatus($carId, $pdo);
+    if ($status === null) {
+        return null;
+    }
+
+    $stmt = $pdo->prepare("UPDATE cars SET status = ? WHERE id = ?");
+    $stmt->execute([$status, $carId]);
+    return $status;
+}
+
+function reconcileAllCarPublicStatuses($pdo = null) {
+    $pdo = $pdo ?: getDB();
+    $pdo->exec("
+        UPDATE cars c
+        SET status = CASE
+            WHEN c.status IN ('maintenance', 'inactive') THEN c.status
+            WHEN EXISTS (
+                SELECT 1 FROM purchases p WHERE p.car_id = c.id AND p.status = 'completed'
+            ) THEN 'sold'
+            WHEN EXISTS (
+                SELECT 1 FROM reservations r WHERE r.car_id = c.id AND r.status = 'confirmed'
+            ) THEN 'rented'
+            WHEN EXISTS (
+                SELECT 1 FROM reservations r WHERE r.car_id = c.id AND r.status = 'pending'
+            ) OR EXISTS (
+                SELECT 1 FROM purchases p WHERE p.car_id = c.id AND p.status = 'pending'
+            ) THEN 'reserved'
+            ELSE 'available'
+        END
+    ");
+}
+
+function ensureCarLifecycleSchema() {
+    static $ensured = false;
+    if ($ensured) {
+        return;
+    }
+    $ensured = true;
+
+    try {
+        $pdo = getDB();
+        $stmt = $pdo->query("SHOW COLUMNS FROM cars LIKE 'status'");
+        $column = $stmt->fetch();
+        $type = strtolower((string)($column['Type'] ?? ''));
+        if (strpos($type, 'reserved') === false) {
+            $pdo->exec("ALTER TABLE cars MODIFY status ENUM('available', 'reserved', 'rented', 'sold', 'maintenance', 'inactive') NOT NULL DEFAULT 'available'");
+            reconcileAllCarPublicStatuses($pdo);
+        } else {
+            $mismatch = (int)$pdo->query("
+                SELECT COUNT(*) FROM cars c
+                WHERE c.status NOT IN ('maintenance', 'inactive')
+                AND c.status = 'available'
+                AND (
+                    EXISTS (SELECT 1 FROM purchases p WHERE p.car_id = c.id AND p.status IN ('pending', 'completed'))
+                    OR EXISTS (SELECT 1 FROM reservations r WHERE r.car_id = c.id AND r.status IN ('pending', 'confirmed'))
+                )
+            ")->fetchColumn();
+            if ($mismatch > 0) {
+                reconcileAllCarPublicStatuses($pdo);
+            }
+        }
+    } catch (Exception $e) {
+        $ensured = false;
+        error_log('Car lifecycle schema check failed: ' . $e->getMessage());
+    }
+}
+
+function lockCarRow($carId, $pdo) {
+    $stmt = $pdo->prepare("SELECT * FROM cars WHERE id = ? FOR UPDATE");
+    $stmt->execute([(int)$carId]);
+    return $stmt->fetch();
 }
 
 // Check for overlapping reservations
@@ -646,7 +798,8 @@ function generateTransactionReference() {
 function getStatusBadgeClass($status) {
     $classes = [
         'available' => 'success',
-        'rented' => 'warning',
+        'reserved' => 'warning',
+        'rented' => 'info',
         'sold' => 'danger',
         'maintenance' => 'secondary',
         'inactive' => 'secondary',
@@ -674,3 +827,6 @@ function paginate($totalItems, $currentPage, $itemsPerPage) {
         'offset' => $offset
     ];
 }
+
+ensureCarLifecycleSchema();
+

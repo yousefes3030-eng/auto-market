@@ -148,7 +148,7 @@ require_once 'includes/header.php';
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">
+                    <button type="submit" class="btn btn-primary btn-lg btn-block" style="margin-bottom: 0.5rem;">
                         Proceed to Payment
                     </button>
                     

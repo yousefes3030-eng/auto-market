@@ -59,6 +59,7 @@ $brands = getAllBrands();
                             <option value="rental" <?php echo $type === 'rental' ? 'selected' : ''; ?>>For Rent</option>
                         </select>
                     </div>
+                    
                     <!-- Search -->
                     <div class="filter-group">
                         <label>Search</label>
@@ -196,10 +197,15 @@ $brands = getAllBrands();
                             $rating = getAverageRating($car['id']);
                             $primaryImage = getPrimaryCarImage($car['id']);
                         ?>
-                            <div class="car-card">
+                            <div class="car-card<?php echo $car['status'] !== 'available' ? ' is-unavailable' : ''; ?>">
                                 <div class="car-image">
                                     <img src="<?php echo e($primaryImage); ?>" alt="<?php echo e($car['brand_name'] . ' ' . $car['model']); ?>" onerror="this.src='assets/images/placeholder-car.jpg'">
                                     <span class="car-badge badge-<?php echo e($car['condition']); ?>"><?php echo ucfirst(e($car['condition'])); ?></span>
+                                    <?php echo carStatusOverlayHtml($car['status']); ?>
+
+                                     <span class="status-badge-class badge-<?php echo getStatusBadgeClass($car['status']); ?>">
+                                        <?php echo e(formatCarPublicStatus($car['status'])); ?>
+                                    </span>
                                 </div>
                                 
                                 <div class="car-content">

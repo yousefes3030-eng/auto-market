@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Broken image fallback
-    const placeholder = (window.APP_URL || '') + '/assets/images/placeholder-car.svg';
+    const placeholder = (window.APP_URL || '') + '/assets/images/placeholder-car.jpg';
     document.querySelectorAll('img').forEach(img => {
         img.addEventListener('error', function() {
             if (this.dataset.fallbackApplied) return;

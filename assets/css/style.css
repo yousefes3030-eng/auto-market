@@ -453,6 +453,8 @@ h1, h2, h3, h4, h5, h6 {
 .nav-drawer-top,
 .nav-account-panel {
     display: none;
+    width: 100%;
+    z-index: 99999999 !important;
 }
 
 .nav-drawer-brand {
@@ -472,12 +474,18 @@ h1, h2, h3, h4, h5, h6 {
     align-items: center;
     gap: 1.5rem;
     margin-left: auto;
+    z-index: 999999999 !important;
 }
 
 .nav-links {
     display: flex;
-    align-items: center;
+    align-items: start;
     gap: 0.2rem;
+    position: relative;
+}
+
+.nav-links li {
+    width: 100% !important;
 }
 
 .nav-links a {
@@ -896,6 +904,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.75rem;
     font-weight: 600;
     text-transform: uppercase;
+    z-index: 100;
 }
 
 .badge-new {
@@ -914,14 +923,35 @@ h1, h2, h3, h4, h5, h6 {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(15, 23, 42, 0.62);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--white);
-    font-weight: 600;
-    font-size: 1.1rem;
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
+}
+
+.car-status-overlay.overlay-reserved {
+    background-color: rgba(146, 64, 14, 0.72);
+    opacity: 35%;
+}
+
+.car-status-overlay.overlay-rented {
+    background-color: rgba(30, 64, 175, 0.72);
+    opacity: 35%;
+}
+
+.car-status-overlay.overlay-sold {
+    background-color: rgba(153, 27, 27, 0.72);
+    opacity: 35%;
+}
+
+.car-status-overlay.overlay-unavailable {
+    background-color: rgba(55, 65, 81, 0.75);
+    opacity: 35%;
 }
 
 .car-content {
@@ -2990,15 +3020,18 @@ h1, h2, h3, h4, h5, h6 {
     
     .nav-account-head {
         display: flex;
-        align-items: center;
         gap: 0.75rem;
         padding: 0.2rem 0.7rem 0.95rem;
     }
     
     .nav-account-head .user-avatar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
         width: 42px;
         height: 42px;
-        font-size: 1rem;
+        font-size: 1.5rem;
+        color: var(--gray-200);
     }
     
     .nav-account-head strong {
@@ -3460,6 +3493,23 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--gray-200);
     flex-shrink: 0;
 }
+
+.status-badge-class {
+   position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.35rem 0.85rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge-class.badge-success { background-color: var(--success-light); color: #166534; }
+.status-badge-class.badge-danger { background-color: var(--danger-light); color: #991b1b; }
+.status-badge-class.badge-warning { background-color: var(--warning-light); color: #92400e; }
+.status-badge-class.badge-info { background-color: var(--info-light); color: #1e40af; }
+.status-badge-class.badge-secondary { background-color: var(--gray-200); color: var(--gray-700); }
 
 .status-badge.badge-success { background-color: var(--success-light); color: #166534; }
 .status-badge.badge-danger { background-color: var(--danger-light); color: #991b1b; }

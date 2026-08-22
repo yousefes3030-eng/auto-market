@@ -208,5 +208,7 @@ INSERT INTO payments (reservation_id, purchase_id, user_id, amount, payment_meth
 
 UPDATE purchases SET payment_id = 7 WHERE id = 1;
 
--- Update car status for purchased car
+-- Public car status is derived from reservations and purchases
 UPDATE cars SET status = 'sold' WHERE id = 3;
+UPDATE cars SET status = 'rented' WHERE id IN (8, 14);
+UPDATE cars SET status = 'reserved' WHERE id = 17;

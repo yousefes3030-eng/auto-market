@@ -32,6 +32,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_reservation'])
                 // Update payment if exists
                 $stmt = $pdo->prepare("UPDATE payments SET status = 'refunded' WHERE reservation_id = ?");
                 $stmt->execute([$reservationId]);
+
+                syncCarPublicStatus($reservation['car_id'], $pdo);
                 
                 $pdo->commit();
                 

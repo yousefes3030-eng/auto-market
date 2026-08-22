@@ -460,6 +460,16 @@ body.admin-body .main-content {
     border: 0;
 }
 
+.form-help {
+    font-size: 0.85rem;
+    color: var(--admin-text-light);
+    margin: 0 0 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
 .form-label-text {
     display: block;
     margin-bottom: 0.5rem;

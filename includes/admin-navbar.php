@@ -42,6 +42,10 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             <i class="fas fa-calendar-check"></i>
             <span>Reservations</span>
         </a>
+        <a href="purchases.php" class="admin-nav-item <?php echo $currentPage == 'purchases.php' ? 'active' : ''; ?>">
+            <i class="fas fa-shopping-cart"></i>
+            <span>Purchases</span>
+        </a>
         <a href="users.php" class="admin-nav-item <?php echo $currentPage == 'users.php' ? 'active' : ''; ?>">
             <i class="fas fa-users"></i>
             <span>Users</span>

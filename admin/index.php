@@ -18,6 +18,9 @@ $totalBrands = $stmt->fetch()['total'];
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM cars WHERE status = 'available'");
 $availableCars = $stmt->fetch()['total'];
 
+$stmt = $pdo->query("SELECT COUNT(*) as total FROM cars WHERE status = 'reserved'");
+$reservedCars = $stmt->fetch()['total'];
+
 $stmt = $pdo->query("SELECT COUNT(*) as total FROM cars WHERE status = 'rented'");
 $rentedCars = $stmt->fetch()['total'];
 
@@ -133,6 +136,10 @@ $popularCars = $stmt->fetchAll();
                     <div class="stat-item">
                         <span class="label">Available:</span>
                         <strong><?php echo $availableCars; ?></strong>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">Reserved:</span>
+                        <strong><?php echo $reservedCars; ?></strong>
                     </div>
                     <div class="stat-item">
                         <span class="label">Rented:</span>

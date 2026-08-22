@@ -62,10 +62,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $pdo->beginTransaction();
                     
                     if ($paymentType === 'reservation') {
-                        // Create reservation
+                        $carRow = lockCarRow($pendingTransaction['car_id'], $pdo);
+                        if (!$carRow || $carRow['status'] !== 'available') {
+                            throw new Exception('This car is no longer available for reservation.');
+                        }
+                        if (hasOverlappingReservation(
+                            $pendingTransaction['car_id'],
+                            $pendingTransaction['start_date'],
+                            $pendingTransaction['end_date']
+                        )) {
+                            throw new Exception('This car is already reserved for the selected dates.');
+                        }
+
                         $stmt = $pdo->prepare("
                             INSERT INTO reservations (user_id, car_id, start_date, end_date, number_of_days, rental_price, total_amount, status)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, 'confirmed')
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')
                         ");
                         $stmt->execute([
                             $_SESSION['user_id'],
@@ -90,6 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $pendingTransaction['total_amount'],
                             $transactionRef
                         ]);
+
+                        syncCarPublicStatus($pendingTransaction['car_id'], $pdo);
                         
                         $pdo->commit();
                         
@@ -107,15 +120,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         exit;
                         
                     } else if ($paymentType === 'purchase') {
-                        // Check if car is still available
-                        if (!isCarAvailable($pendingTransaction['car_id'])) {
+                        $carRow = lockCarRow($pendingTransaction['car_id'], $pdo);
+                        if (!$carRow || $carRow['status'] !== 'available') {
                             throw new Exception('Car is no longer available for purchase.');
                         }
                         
                         // Create purchase
                         $stmt = $pdo->prepare("
                             INSERT INTO purchases (user_id, car_id, amount, status)
-                            VALUES (?, ?, ?, 'completed')
+                            VALUES (?, ?, ?, 'pending')
                         ");
                         $stmt->execute([
                             $_SESSION['user_id'],
@@ -141,10 +154,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Update purchase with payment ID
                         $stmt = $pdo->prepare("UPDATE purchases SET payment_id = ? WHERE id = ?");
                         $stmt->execute([$paymentId, $purchaseId]);
-                        
-                        // Update car status to sold
-                        $stmt = $pdo->prepare("UPDATE cars SET status = 'sold' WHERE id = ?");
-                        $stmt->execute([$pendingTransaction['car_id']]);
+
+                        syncCarPublicStatus($pendingTransaction['car_id'], $pdo);
                         
                         $pdo->commit();
                         
@@ -224,7 +235,7 @@ require_once 'includes/header.php';
                         </button>
                     </form>
                     
-                    <form method="POST" action="" style="margin-top: 1rem;">
+                    <form method="POST" action="" style="margin-bottom: 2rem; padding-left:2rem; padding-right: 2rem;">
                         <?php echo csrfField(); ?>
                         <input type="hidden" name="action" value="cancel">
                         <button type="submit" class="btn btn-outline btn-block">Cancel Payment</button>

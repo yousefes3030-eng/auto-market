@@ -97,13 +97,11 @@ $brands = getAllBrands();
                     $rating = getAverageRating($car['id']);
                     $primaryImage = getPrimaryCarImage($car['id']);
                 ?>
-                    <div class="car-card">
+                    <div class="car-card<?php echo $car['status'] !== 'available' ? ' is-unavailable' : ''; ?>">
                         <div class="car-image">
                             <img src="<?php echo e($primaryImage); ?>" alt="<?php echo e($car['brand_name'] . ' ' . $car['model']); ?>" onerror="this.src='assets/images/placeholder-car.jpg'">
                             <span class="car-badge badge-<?php echo e($car['condition']); ?>"><?php echo ucfirst(e($car['condition'])); ?></span>
-                            <?php if ($car['status'] !== 'available'): ?>
-                                <span class="car-status-overlay"><?php echo ucfirst(e($car['status'])); ?></span>
-                            <?php endif; ?>
+                            <?php echo carStatusOverlayHtml($car['status']); ?>
                         </div>
                         
                         <div class="car-content">

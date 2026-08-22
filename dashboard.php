@@ -11,7 +11,7 @@ $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM reservations WHERE user_id 
 $stmt->execute([$userId]);
 $totalReservations = $stmt->fetch()['total'];
 
-$stmt = $pdo->prepare("SELECT COUNT(*) as total FROM reservations WHERE user_id = ? AND status = 'confirmed'");
+$stmt = $pdo->prepare("SELECT COUNT(*) as total FROM reservations WHERE user_id = ? AND status IN ('pending', 'confirmed')");
 $stmt->execute([$userId]);
 $activeReservations = $stmt->fetch()['total'];
 

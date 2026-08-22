@@ -44,7 +44,7 @@ CREATE TABLE cars (
     color VARCHAR(50),
     seats INT DEFAULT 5,
     description TEXT,
-    status ENUM('available', 'rented', 'sold', 'maintenance', 'inactive') DEFAULT 'available',
+    status ENUM('available', 'reserved', 'rented', 'sold', 'maintenance', 'inactive') DEFAULT 'available',
     featured BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -31,7 +31,7 @@ if (!$purchase) {
     exit;
 }
 
-$pageTitle = 'Purchase Confirmed';
+$pageTitle = 'Purchase Submitted';
 require_once 'includes/header.php';
 ?>
 
@@ -42,8 +42,8 @@ require_once 'includes/header.php';
                 <i class="fas fa-check-circle"></i>
             </div>
             
-            <h1>Purchase Confirmed!</h1>
-            <p>Congratulations! Your car purchase has been successfully completed.</p>
+            <h1>Purchase Submitted</h1>
+            <p>Your purchase request is pending admin confirmation. Other shoppers will see this car as <strong>Reserved</strong> until it is marked sold or cancelled.</p>
             
             <div class="transaction-reference">
                 <span>Transaction Reference:</span>
@@ -88,10 +88,10 @@ require_once 'includes/header.php';
             <div class="success-message-box">
                 <h4>What's Next?</h4>
                 <ul>
-                    <li><i class="fas fa-check"></i> Our team will contact you within 24-48 hours</li>
-                    <li><i class="fas fa-check"></i> We'll arrange vehicle inspection and delivery</li>
-                    <li><i class="fas fa-check"></i> Complete necessary documentation and registration</li>
-                    <li><i class="fas fa-check"></i> Take delivery of your new vehicle</li>
+                    <li><i class="fas fa-check"></i> An admin will review and confirm your purchase</li>
+                    <li><i class="fas fa-check"></i> The car stays reserved so nobody else can buy or rent it</li>
+                    <li><i class="fas fa-check"></i> Once confirmed, the car is marked sold for all shoppers</li>
+                    <li><i class="fas fa-check"></i> We'll then arrange inspection, paperwork, and delivery</li>
                 </ul>
             </div>
             

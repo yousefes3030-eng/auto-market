@@ -31,7 +31,7 @@ if (!$reservation) {
     exit;
 }
 
-$pageTitle = 'Reservation Confirmed';
+$pageTitle = 'Reservation Submitted';
 require_once 'includes/header.php';
 ?>
 
@@ -42,8 +42,8 @@ require_once 'includes/header.php';
                 <i class="fas fa-check-circle"></i>
             </div>
             
-            <h1>Reservation Confirmed!</h1>
-            <p>Your car rental reservation has been successfully completed.</p>
+            <h1>Reservation Submitted</h1>
+            <p>Your rental request is pending admin confirmation. Other shoppers will see this car as <strong>Reserved</strong> until it is confirmed or cancelled.</p>
             
             <div class="transaction-reference">
                 <span>Transaction Reference:</span>
@@ -81,6 +81,12 @@ require_once 'includes/header.php';
                         <strong><?php echo $reservation['number_of_days']; ?> days</strong>
                     </div>
                     <div class="info-row">
+                        <span>Status:</span>
+                        <strong class="status-badge badge-<?php echo getStatusBadgeClass($reservation['status']); ?>">
+                            <?php echo ucfirst(e($reservation['status'])); ?>
+                        </strong>
+                    </div>
+                    <div class="info-row">
                         <span>Daily Rate:</span>
                         <strong><?php echo formatPrice($reservation['rental_price']); ?></strong>
                     </div>
@@ -99,7 +105,7 @@ require_once 'includes/header.php';
             
             <div class="success-note">
                 <i class="fas fa-info-circle"></i>
-                <p>A confirmation has been recorded in your account. You can view and manage your reservations from your dashboard.</p>
+                <p>A confirmation has been recorded in your account. An admin will update this reservation to confirmed, completed, or cancelled. You can track it from your dashboard.</p>
             </div>
         </div>
     </div>

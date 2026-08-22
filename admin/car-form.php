@@ -42,6 +42,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $seats = intval($_POST['seats'] ?? 5);
     $description = trim($_POST['description'] ?? '');
     $status = $_POST['status'] ?? 'available';
+    if (!in_array($status, ['maintenance', 'inactive'], true)) {
+        $status = 'available';
+    }
     $featured = isset($_POST['featured']) ? 1 : 0;
 
     $car = [
@@ -128,6 +131,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $status, $featured
                 ]);
                 $carId = (int)$pdo->lastInsertId();
+            }
+
+            if ($carId && !in_array($status, ['maintenance', 'inactive'], true)) {
+                syncCarPublicStatus($carId, $pdo);
             }
 
             $pdo->commit();
@@ -350,11 +357,18 @@ require_once __DIR__ . '/../includes/header.php';
                     </div>
                     
                     <div class="form-group">
-                        <label for="status">Status *</label>
+                        <label for="status">Listing lock</label>
+                        <?php if ($car): ?>
+                            <p class="form-help">
+                                Public status:
+                                <span class="status-badge badge-<?php echo getStatusBadgeClass($car['status']); ?>">
+                                    <?php echo e(formatCarPublicStatus($car['status'])); ?>
+                                </span>
+                                — reserved, rented, and sold come from reservations and purchases.
+                            </p>
+                        <?php endif; ?>
                         <select id="status" name="status" class="form-control" required>
-                            <option value="available" <?php echo ($car && $car['status'] == 'available') ? 'selected' : ''; ?>>Available</option>
-                            <option value="rented" <?php echo ($car && $car['status'] == 'rented') ? 'selected' : ''; ?>>Rented</option>
-                            <option value="sold" <?php echo ($car && $car['status'] == 'sold') ? 'selected' : ''; ?>>Sold</option>
+                            <option value="available" <?php echo (!$car || !in_array($car['status'], ['maintenance', 'inactive'], true)) ? 'selected' : ''; ?>>Automatic (from orders)</option>
                             <option value="maintenance" <?php echo ($car && $car['status'] == 'maintenance') ? 'selected' : ''; ?>>Maintenance</option>
                             <option value="inactive" <?php echo ($car && $car['status'] == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
                         </select>

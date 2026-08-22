@@ -20,3 +20,4 @@ if (!empty($requireLogin)) {
 }
 
 $currentUser = getCurrentUser();
+ensureCarLifecycleSchema();
